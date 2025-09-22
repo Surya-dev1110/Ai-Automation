@@ -1,0 +1,199 @@
+{
+  "name": "SimpleLearn 1",
+  "nodes": [
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.chatTrigger",
+      "typeVersion": 1.3,
+      "position": [
+        -208,
+        -64
+      ],
+      "id": "6b388f4e-acf5-4b48-bf15-f2040dae0685",
+      "name": "When chat message received",
+      "webhookId": "d2cf4ae6-bf56-49c5-9eb8-f1b20b46a76e"
+    },
+    {
+      "parameters": {
+        "operation": "getAllPeople"
+      },
+      "type": "n8n-nodes-base.n8nTrainingCustomerDatastore",
+      "typeVersion": 1,
+      "position": [
+        0,
+        -64
+      ],
+      "id": "6c9d918b-78a1-4368-92c3-25f9f48bb946",
+      "name": "Customer Datastore (n8n training)",
+      "notesInFlow": false
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "cb5758b7-9c2f-48ae-8d2b-01e200d24581",
+              "name": "FullName",
+              "value": "={{ $json.name }}_{{ $json.country }}",
+              "type": "string"
+            },
+            {
+              "id": "fd3398c8-2aaf-46be-9c28-37bb0252848f",
+              "name": "email",
+              "value": "={{ $json.email }}",
+              "type": "string"
+            },
+            {
+              "id": "b4551dc2-d744-4f88-91f6-8c2451bc8374",
+              "name": "ID",
+              "value": "={{ $json.id }}",
+              "type": "number"
+            },
+            {
+              "id": "c2af6e9f-ed48-4caa-a9fe-75a5e2d795ba",
+              "name": "country",
+              "value": "={{ $json.country }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        208,
+        -64
+      ],
+      "id": "42b273ec-0f85-4995-b21c-48ad42523f79",
+      "name": "Transform Data"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "fb839a1b-ee2f-4b3a-9137-a2a3a98b8aad",
+              "leftValue": "={{ $json.country }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "exists",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        416,
+        -64
+      ],
+      "id": "8a23e188-e93b-4586-8050-7e37cb49bda2",
+      "name": "If"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        704,
+        -224
+      ],
+      "id": "83402d2c-7bcb-4362-adf8-fb13670e8969",
+      "name": "Edit Fields"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        720,
+        64
+      ],
+      "id": "ed79c117-41c4-4bbe-8d90-f746562086bb",
+      "name": "Edit Fields1"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "When chat message received": {
+      "main": [
+        [
+          {
+            "node": "Customer Datastore (n8n training)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Customer Datastore (n8n training)": {
+      "main": [
+        [
+          {
+            "node": "Transform Data",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Transform Data": {
+      "main": [
+        [
+          {
+            "node": "If",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Edit Fields1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "a2a357d3-0087-4f25-bb25-66dc0c72c64a",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "7d23c7f9c9726e078fd873c1138164d8b3b8701ec1037900b85cfa9100142bbb"
+  },
+  "id": "Gx1t0gxq3jNPtbxz",
+  "tags": []
+}
