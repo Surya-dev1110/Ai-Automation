@@ -1,0 +1,294 @@
+{
+  "name": "Cab Invoice",
+  "nodes": [
+    {
+      "parameters": {
+        "updates": [
+          "message"
+        ],
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.telegramTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        -384,
+        -80
+      ],
+      "id": "3a91f844-11a9-4d8c-ae82-8a896ca7743e",
+      "name": "Telegram Trigger",
+      "webhookId": "64d16ab9-44f4-4f31-9572-7ca5e861b023",
+      "alwaysOutputData": false,
+      "executeOnce": false,
+      "credentials": {
+        "telegramApi": {
+          "id": "svl8AK6Y33CwfEDu",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Parse customer name, pickup location, drop location, and cost from Telegram message. MESSAGE : {{ $json.message.text }}",
+        "hasOutputParser": true,
+        "options": {
+          "systemMessage": "Return output only in JSON format.\n\nExample:\n{\n  \"customer_name\": \"John\",\n  \"from_location\": \"Chennai\",\n  \"to_location\": \"Airport\",\n  \"cost\": 850\n}"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        -112,
+        -80
+      ],
+      "id": "d08f5b19-0e14-47fb-9e66-e03b28f25094",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1.1,
+      "position": [
+        -288,
+        208
+      ],
+      "id": "c2cf0e2b-a9d0-4ee4-87fa-9122413360a9",
+      "name": "Google Gemini Chat Model",
+      "notesInFlow": false,
+      "credentials": {
+        "googlePalmApi": {
+          "id": null,
+          "name": "",
+          "__aiGatewayManaged": true
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sessionIdType": "customKey",
+        "sessionKey": "={{ $('Telegram Trigger').item.json.message.from.id }}"
+      },
+      "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
+      "typeVersion": 1.3,
+      "position": [
+        -112,
+        224
+      ],
+      "id": "5d8342f3-8f35-46bc-8a22-8246cf012527",
+      "name": "Simple Memory"
+    },
+    {
+      "parameters": {
+        "operation": "sendDocument",
+        "chatId": "={{ $('Telegram Trigger').item.json.message.chat.id }}",
+        "binaryData": true,
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        1056,
+        0
+      ],
+      "id": "dbd47632-eb12-4e14-8fd1-721017724890",
+      "name": "Send a document",
+      "webhookId": "7e033960-3890-412f-a575-8673181a39cc",
+      "credentials": {
+        "telegramApi": {
+          "id": "svl8AK6Y33CwfEDu",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "html": "<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n  <meta charset=\"UTF-8\">\n  <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">\n  <title>Cab Invoice</title>\n\n  <style>\n    * {\n      margin: 0;\n      padding: 0;\n      box-sizing: border-box;\n      font-family: 'Segoe UI', sans-serif;\n    }\n\n    body {\n      background: linear-gradient(135deg, #f2f6ff, #dfe9f3);\n      padding: 40px;\n    }\n\n    .invoice-container {\n      max-width: 750px;\n      margin: auto;\n      background: #fff;\n      border-radius: 20px;\n      overflow: hidden;\n      box-shadow: 0 15px 40px rgba(0,0,0,0.12);\n    }\n\n    .top-bar {\n      background: linear-gradient(135deg, #2c3e50, #3498db);\n      color: white;\n      padding: 35px;\n      display: flex;\n      justify-content: space-between;\n      align-items: center;\n    }\n\n    .top-bar h1 {\n      font-size: 32px;\n      letter-spacing: 1px;\n    }\n\n    .invoice-meta {\n      text-align: right;\n      font-size: 14px;\n      line-height: 1.8;\n    }\n\n    .content {\n      padding: 35px;\n    }\n\n    .customer-box {\n      background: #f7f9fc;\n      border-radius: 15px;\n      padding: 25px;\n      margin-bottom: 30px;\n      border-left: 5px solid #3498db;\n    }\n\n    .customer-box h3 {\n      margin-bottom: 20px;\n      color: #2c3e50;\n    }\n\n    .detail-row {\n      display: flex;\n      justify-content: space-between;\n      margin-bottom: 15px;\n      padding-bottom: 10px;\n      border-bottom: 1px dashed #ddd;\n    }\n\n    .label {\n      font-weight: 600;\n      color: #555;\n    }\n\n    .value {\n      color: #222;\n    }\n\n    .fare-section {\n      background: linear-gradient(135deg, #3498db, #2ecc71);\n      color: white;\n      border-radius: 15px;\n      padding: 30px;\n      text-align: center;\n      margin-top: 20px;\n    }\n\n    .fare-section p {\n      font-size: 18px;\n      opacity: 0.9;\n      margin-bottom: 10px;\n    }\n\n    .fare-section h2 {\n      font-size: 42px;\n      letter-spacing: 1px;\n    }\n\n    .footer {\n      text-align: center;\n      padding: 25px;\n      background: #fafafa;\n      color: #777;\n      font-size: 14px;\n      border-top: 1px solid #eee;\n    }\n\n    @media(max-width: 600px) {\n      .top-bar {\n        flex-direction: column;\n        text-align: center;\n        gap: 15px;\n      }\n\n      .invoice-meta {\n        text-align: center;\n      }\n\n      .detail-row {\n        flex-direction: column;\n        gap: 5px;\n      }\n    }\n  </style>\n</head>\n\n<body>\n\n  <div class=\"invoice-container\">\n\n    <div class=\"top-bar\">\n      <div>\n        <h1>Cab Invoice</h1>\n      </div>\n\n      <div class=\"invoice-meta\">\n        <div>Invoice #: 123</div>\n        <div>Date: <span>{{ $now.format('dd-MM-yyyy') }}</span>\n</div>\n      </div>\n    </div>\n\n    <div class=\"content\">\n\n      <div class=\"customer-box\">\n        <h3>Ride Details</h3>\n\n        <div class=\"detail-row\">\n          <span class=\"label\">Customer Name</span>\n          <span class=\"value\">{{ $json.customer_name }}</span>\n        </div>\n\n        <div class=\"detail-row\">\n          <span class=\"label\">Pickup Location</span>\n          <span class=\"value\">{{ $json.from_location }}</span>\n        </div>\n\n        <div class=\"detail-row\">\n          <span class=\"label\">Drop Location</span>\n          <span class=\"value\">{{ $json.to_location }}</span>\n        </div>\n      </div>\n\n      <div class=\"fare-section\">\n        <p>Total Fare</p>\n        <h2>₹{{ $json.cost }}</h2>\n      </div>\n\n    </div>\n\n    <div class=\"footer\">\n      Thank you for riding with us 🚖\n    </div>\n\n  </div>\n  <script>\n  document.getElementById(\"invoiceDate\").innerText =\n    new Date().toLocaleDateString('en-GB');\n</script>\n\n</body>\n</html>"
+      },
+      "type": "n8n-nodes-base.html",
+      "typeVersion": 1.2,
+      "position": [
+        304,
+        192
+      ],
+      "id": "6454ed88-9b2d-4dca-b503-79f651abc2aa",
+      "name": "HTML"
+    },
+    {
+      "parameters": {
+        "jsCode": "const parsed = JSON.parse($input.first().json.output);\n\nreturn [\n  {\n    json: parsed\n  }\n];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        112,
+        192
+      ],
+      "id": "79decbab-ae28-46bf-9661-827fd857b70f",
+      "name": "Code in JavaScript"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.pdfshift.io/v3/convert/pdf",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "X-API-Key",
+              "value": "sk_d5a7f286794c854639e52fd536e3a9036c2ae42a"
+            }
+          ]
+        },
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "source",
+              "value": "={{ $json.html }}"
+            },
+            {
+              "name": "filename",
+              "value": "invoice.pdf"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        480,
+        208
+      ],
+      "id": "6e12a0b4-4983-435e-804f-810b59b72739",
+      "name": "PDFSHIFT Generate PDF"
+    },
+    {
+      "parameters": {
+        "url": "={{ $json.url }}",
+        "options": {
+          "response": {
+            "response": {
+              "fullResponse": true,
+              "neverError": true,
+              "responseFormat": "file"
+            }
+          }
+        }
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        640,
+        208
+      ],
+      "id": "2550a110-7c5d-4726-9e3a-abb67ec472ec",
+      "name": "download PDF"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Telegram Trigger": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Simple Memory": {
+      "ai_memory": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTML": {
+      "main": [
+        [
+          {
+            "node": "PDFSHIFT Generate PDF",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript": {
+      "main": [
+        [
+          {
+            "node": "HTML",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "PDFSHIFT Generate PDF": {
+      "main": [
+        [
+          {
+            "node": "download PDF",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "download PDF": {
+      "main": [
+        [
+          {
+            "node": "Send a document",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "3c389b0d-aaa1-46d7-ae3a-717b428fe81d",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "f82a2dede43dc7465ab93b14b2789512e96581020f2c53ea1d27e728ff78907f"
+  },
+  "id": "QxxVrzXqUOdRjKit",
+  "tags": []
+}
