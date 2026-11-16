@@ -1,0 +1,509 @@
+{
+  "name": "telegram mcp chat bot",
+  "nodes": [
+    {
+      "parameters": {
+        "updates": [
+          "message"
+        ],
+        "additionalFields": {}
+      },
+      "id": "23caf4a8-8501-4e0a-a868-b63208eae763",
+      "name": "Telegram Trigger",
+      "type": "n8n-nodes-base.telegramTrigger",
+      "typeVersion": 1.5,
+      "position": [
+        -336,
+        -96
+      ],
+      "webhookId": "c6571913-3ddc-4591-8a40-9fda67b4efce",
+      "credentials": {
+        "telegramApi": {
+          "id": "DHlNidY1WRexKWDP",
+          "name": "Telegram account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "dataTableId": {
+          "__rl": true,
+          "mode": "id",
+          "value": "0Pkwy2Nnx7JpaFVc",
+          "cachedResultName": "typing_status"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "update_id": "={{ String($json.update_id) }}",
+            "chat_id": "={{ String($json.message.chat.id) }}",
+            "done": false
+          },
+          "schema": [
+            {
+              "id": "update_id",
+              "displayName": "update_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "chat_id",
+              "displayName": "chat_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "done",
+              "displayName": "done",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "boolean",
+              "canBeUsedToMatch": true
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "68048e03-53d9-443e-aa1e-57d728a7707f",
+      "name": "Create Typing Flag",
+      "type": "n8n-nodes-base.dataTable",
+      "typeVersion": 1.1,
+      "position": [
+        -112,
+        -96
+      ]
+    },
+    {
+      "parameters": {
+        "workflowId": {
+          "__rl": true,
+          "mode": "id",
+          "value": "2cNGAwXhcOVJRjlC",
+          "cachedResultName": "Telegram typing indicator helper"
+        },
+        "workflowInputs": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "chat_id": "={{ String($('Telegram Trigger').item.json.message.chat.id) }}",
+            "update_id": "={{ String($('Telegram Trigger').item.json.update_id) }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "chat_id",
+              "displayName": "chat_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string"
+            },
+            {
+              "id": "update_id",
+              "displayName": "update_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string"
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": true
+        },
+        "options": {
+          "waitForSubWorkflow": false
+        }
+      },
+      "id": "124f4bf6-8425-42f6-8a47-c749b0855b04",
+      "name": "Start Typing Loop",
+      "type": "n8n-nodes-base.executeWorkflow",
+      "typeVersion": 1.4,
+      "position": [
+        144,
+        16
+      ]
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $('Telegram Trigger').item.json.message.text }}",
+        "options": {
+          "systemMessage": "# Role: Dental Clinic Organization Admin Assistant\n\nYou are an intelligent AI assistant helping the Organization Admin manage and monitor the Dental Clinical Management System.\n\n## 1. Application Restrictions\n- Use ONLY the Zoho Creator application `dental-clinic-management-system`.\n- Never access any other application.\n- Use only tools and data belonging to this application.\n- Discover available forms, fields and reports when necessary.\n\n## 2. Responsibilities\nAssist with:\n- Organization and branch management.\n- Patients and clinical history.\n- Providers and employees.\n- Appointments and sessions.\n- Clinical reports.\n- Billing, invoices and revenue.\n- Provider leave and approvals.\n- Patient feedback and analytics.\n- Organization-wide operational reports.\n\n## 3. Tool Usage\n- Use MCP tools to retrieve actual data and execute authorized operations.\n- Never invent information or assume record details.\n- Verify tool responses before presenting results.\n- Follow existing Deluge functions, workflows and validations.\n- Never expose raw API responses or technical credentials.\n\n## 4. Data Modification and Restrictions\n- You may add records, update records and execute authorized business workflows.\n- NEVER perform delete operations under any circumstances.\n- Never call delete tools or permanently remove any application data.\n- If deletion is requested, explain that it is not permitted.\n- Obtain explicit confirmation before sensitive modifications or approvals.\n- Verify successful execution before reporting completion.\n\n## 5. Security\n- Assist only the authenticated Organization Admin.\n- Respect organization-level data isolation and Creator permissions.\n- Protect patient and clinical information.\n- Never bypass application validations or disclose confidential information.\n\n## 6. Communication\n- Be professional, friendly and concise.\n- Use simple language, headings and bullet points.\n- Format financial values in INR (₹).\n- Include relevant dates and reporting periods.\n- Maintain conversation context and understand follow-up questions.\n- Ask for clarification when necessary.\n\n## Primary Objective\nAct as a reliable organization management assistant, providing accurate insights and helping the administrator manage daily dental clinic operations securely.\n\n## Scope Restrictions\n\nYou are exclusively an assistant for the Dental Clinical Management System.\n\n- Only answer questions related to dental clinic operations, organization management, patients, appointments, providers, billing, reports and application usage.\n- For organization-specific information, always use the appropriate Zoho Creator MCP tools.\n- Do not answer unrelated general knowledge, programming, education, entertainment, personal or other external questions.\n- Do not generate interview questions, write code or act as a general-purpose chatbot unless directly required for an authorized application task.\n- If a request is outside your scope, politely decline and redirect the user to dental clinic management topics.\n\nExample response:\n\n\"I'm designed specifically to assist with your dental organization's management and operations. I can help with appointments, patients, providers, billing and organizational reports.\"\n\n**Always use only `dental-clinic-management-system`. Delete operations are strictly prohibited.**"
+        }
+      },
+      "id": "7bf60d7f-8d65-4222-80cb-8355b22e9bdf",
+      "name": "AI Agent",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        464,
+        0
+      ],
+      "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": {
+        "modelName": "models/gemini-3.1-flash-lite",
+        "options": {}
+      },
+      "id": "550c7931-3a39-488b-b31c-698dcdde53a2",
+      "name": "Google Gemini Chat Model",
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1.2,
+      "position": [
+        336,
+        208
+      ],
+      "credentials": {
+        "googlePalmApi": {
+          "id": "7iIwZPvNPa9yLauJ",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sessionIdType": "customKey",
+        "sessionKey": "={{ $(\"Telegram Trigger\").item.json.message.chat.id }}"
+      },
+      "id": "469cdbd9-e299-40c0-bd4e-40bcc3ce3a36",
+      "name": "Simple Memory",
+      "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
+      "typeVersion": 1.4,
+      "position": [
+        512,
+        240
+      ]
+    },
+    {
+      "parameters": {
+        "endpointUrl": "https://n8n-mcp-60089737935.zohomcp.in/mcp/3fdfbcc7649ed86f959c945bfc171cf2/message",
+        "authentication": "mcpOAuth2Api",
+        "include": "selected",
+        "includeTools": [
+          "ZohoCreator_getWorkspaces",
+          "ZohoCreator_getApplications",
+          "ZohoCreator_getApplicationsByWorkspace",
+          "ZohoCreator_getApplicationSummary",
+          "ZohoCreator_getForms",
+          "ZohoCreator_getFormMetadata",
+          "ZohoCreator_getReports",
+          "ZohoCreator_getReportMetadata",
+          "ZohoCreator_getCreatorRecords",
+          "ZohoCreator_getRecordByID"
+        ],
+        "options": {}
+      },
+      "id": "09c519b5-8dd9-4082-9574-68081209a905",
+      "name": "MCP Client",
+      "type": "@n8n/n8n-nodes-langchain.mcpClientTool",
+      "typeVersion": 1.4,
+      "position": [
+        704,
+        256
+      ],
+      "credentials": {
+        "mcpOAuth2Api": {
+          "id": "wU4Akj5lPaoh6sur",
+          "name": "Unnamed credential"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "id": "ad01f522-3614-4432-ab5f-2bf29a82293f",
+      "name": "Date & Time",
+      "type": "n8n-nodes-base.dateTimeTool",
+      "typeVersion": 2,
+      "position": [
+        864,
+        224
+      ]
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $('Telegram Trigger').item.json.message.chat.id }}",
+        "text": "Sorry, I couldn't complete your request right now. There was a temporary issue while processing your request. Please try again in a moment. If the issue continues, please contact the administrator.",
+        "additionalFields": {
+          "appendAttribution": false
+        }
+      },
+      "id": "d611f0eb-15d2-4b7d-a84d-6915f2c139a2",
+      "name": "Send Error Message",
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        976,
+        144
+      ],
+      "webhookId": "e407d4a6-46e2-4223-857a-0f1d9164f6ba",
+      "credentials": {
+        "telegramApi": {
+          "id": "DHlNidY1WRexKWDP",
+          "name": "Telegram account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "dataTableId": {
+          "__rl": true,
+          "mode": "id",
+          "value": "0Pkwy2Nnx7JpaFVc",
+          "cachedResultName": "typing_status"
+        },
+        "matchType": "allConditions",
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "update_id",
+              "keyValue": "={{ String($('Telegram Trigger').item.json.update_id) }}"
+            }
+          ]
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "done": true
+          },
+          "schema": [
+            {
+              "id": "done",
+              "displayName": "done",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "boolean",
+              "canBeUsedToMatch": true
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "5347fd1d-5ba3-4191-8879-105c962bdaba",
+      "name": "Mark Error Sent",
+      "type": "n8n-nodes-base.dataTable",
+      "typeVersion": 1.1,
+      "position": [
+        1184,
+        112
+      ]
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $('Telegram Trigger').item.json.message.chat.id }}",
+        "text": "={{ $json.output }}",
+        "additionalFields": {
+          "appendAttribution": false,
+          "parse_mode": "HTML"
+        }
+      },
+      "id": "608f4bf7-ce08-4dc9-96b8-24db2b5ed65b",
+      "name": "Send a rich message",
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        832,
+        0
+      ],
+      "webhookId": "530017e8-c4b7-410f-bf56-b12f7348ad0e",
+      "credentials": {
+        "telegramApi": {
+          "id": "DHlNidY1WRexKWDP",
+          "name": "Telegram account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "dataTableId": {
+          "__rl": true,
+          "mode": "id",
+          "value": "0Pkwy2Nnx7JpaFVc",
+          "cachedResultName": "typing_status"
+        },
+        "matchType": "allConditions",
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "update_id",
+              "keyValue": "={{ String($('Telegram Trigger').item.json.update_id) }}"
+            }
+          ]
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "done": true
+          },
+          "schema": [
+            {
+              "id": "done",
+              "displayName": "done",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "boolean",
+              "canBeUsedToMatch": true
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "4841dd0d-cb5e-4835-9ab8-05afe80cd497",
+      "name": "Mark Reply Sent",
+      "type": "n8n-nodes-base.dataTable",
+      "typeVersion": 1.1,
+      "position": [
+        1184,
+        -80
+      ]
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Telegram Trigger": {
+      "main": [
+        [
+          {
+            "node": "Create Typing Flag",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create Typing Flag": {
+      "main": [
+        [
+          {
+            "node": "Start Typing Loop",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Start Typing Loop": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent": {
+      "main": [
+        [
+          {
+            "node": "Send a rich message",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Send Error Message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Simple Memory": {
+      "ai_memory": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "MCP Client": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Date & Time": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send Error Message": {
+      "main": [
+        [
+          {
+            "node": "Mark Error Sent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send a rich message": {
+      "main": [
+        [
+          {
+            "node": "Mark Reply Sent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": true
+  },
+  "versionId": "228f2276-306d-4652-bd4f-0a1202635fb0",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "ef784c573da1008ed814fa5c0a375dc7f754c4b241af3436a33466d7dd0162f2"
+  },
+  "nodeGroups": [],
+  "id": "t0Y1PNZV4613KeOu",
+  "tags": []
+}

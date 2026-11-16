@@ -1,0 +1,203 @@
+{
+  "name": "Telegram typing indicator helper",
+  "nodes": [
+    {
+      "parameters": {
+        "workflowInputs": {
+          "values": [
+            {
+              "name": "chat_id"
+            },
+            {
+              "name": "update_id"
+            }
+          ]
+        }
+      },
+      "id": "dee55439-6360-4636-8430-e5bde01c991d",
+      "name": "Execute Workflow Trigger",
+      "type": "n8n-nodes-base.executeWorkflowTrigger",
+      "typeVersion": 1.3,
+      "position": [
+        0,
+        80
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "return Array.from({ length: 20 }, (_, i) => ({ json: { tick: i + 1 } }));"
+      },
+      "id": "24d307e4-65be-4987-b03e-22ff54d18e96",
+      "name": "Build Ticks",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        224,
+        80
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "get",
+        "dataTableId": {
+          "__rl": true,
+          "mode": "id",
+          "value": "0Pkwy2Nnx7JpaFVc",
+          "cachedResultName": "typing_status"
+        },
+        "matchType": "allConditions",
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "update_id",
+              "keyValue": "={{ $(\"Execute Workflow Trigger\").first().json.update_id }}"
+            },
+            {
+              "keyName": "done",
+              "condition": "isFalse"
+            }
+          ]
+        },
+        "limit": 1
+      },
+      "id": "61366ab2-c7d8-4158-86ca-838ff38c736b",
+      "name": "Reply Not Sent Yet",
+      "type": "n8n-nodes-base.dataTable",
+      "typeVersion": 1.1,
+      "position": [
+        672,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "sendChatAction",
+        "chatId": "={{ $(\"Execute Workflow Trigger\").first().json.chat_id }}"
+      },
+      "id": "31bb80e3-db16-47bd-8142-96f6c3749c46",
+      "name": "Send Typing",
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        896,
+        0
+      ],
+      "webhookId": "3b9ab192-6943-4fde-8cdb-4b0e3b52533e",
+      "credentials": {
+        "telegramApi": {
+          "id": "DHlNidY1WRexKWDP",
+          "name": "Telegram account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "amount": 4
+      },
+      "id": "edf81658-0334-4b09-ac68-073c6c971304",
+      "name": "Wait 4s",
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        1120,
+        80
+      ],
+      "webhookId": "e749aa0f-7757-4664-ad04-9b14cc6078c9"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "id": "654a1e40-a16c-404f-90f8-e0dc54bcbcde",
+      "name": "Loop Ticks",
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 3,
+      "position": [
+        448,
+        80
+      ]
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Execute Workflow Trigger": {
+      "main": [
+        [
+          {
+            "node": "Build Ticks",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Build Ticks": {
+      "main": [
+        [
+          {
+            "node": "Loop Ticks",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Reply Not Sent Yet": {
+      "main": [
+        [
+          {
+            "node": "Send Typing",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send Typing": {
+      "main": [
+        [
+          {
+            "node": "Wait 4s",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Wait 4s": {
+      "main": [
+        [
+          {
+            "node": "Loop Ticks",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Loop Ticks": {
+      "main": [
+        [],
+        [
+          {
+            "node": "Reply Not Sent Yet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "de379112-459b-424f-80bd-81ffba353bb6",
+  "meta": {
+    "instanceId": "ef784c573da1008ed814fa5c0a375dc7f754c4b241af3436a33466d7dd0162f2"
+  },
+  "nodeGroups": [],
+  "id": "2cNGAwXhcOVJRjlC",
+  "tags": []
+}
